@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Poèmes d’Amour</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #eac1f5, #ffe4e1);
+      color: #333;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 60px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, button, select {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #ff69b4;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #ff1493;
+    }
+
+    .error-msg {
+      color: red;
+      margin-top: 10px;
+    }
+
+    .poeme-list {
+      margin-top: 20px;
+    }
+
+    .poeme {
+      background: #fff0f5;
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 10px;
+      box-shadow: 0 0 6px rgba(0,0,0,0.1);
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="auth">
+    <h2>Connexion</h2>
+    <form id="login-form">
+      <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+      <input type="password" id="password" placeholder="Mot de passe" required>
+      <button type="submit">Se connecter</button>
+      <p id="error-msg" class="error-msg"></p>
+    </form>
+    <p>Pas de compte ? <a href="#" onclick="showRegister()">Créer un compte</a></p>
+
+    <div id="register" style="display: none;">
+      <h2>Inscription</h2>
+      <form id="register-form">
+        <input type="text" id="new-username" placeholder="Nouveau nom" required>
+        <input type="password" id="new-password" placeholder="Nouveau mot de passe" required>
+        <button type="submit">S'inscrire</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="container" id="app" style="display: none;">
+    <header>
+      <h3>💖 Poèmes d’Amour</h3>
+      <select id="language-selector">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="sw">Swahili</option>
+        <option value="ln">Lingala</option>
+      </select>
+      <button onclick="logout()">Déconnexion</button>
+    </header>
+    <div id="poeme-list" class="poeme-list"></div>
+  </div>
+
+  <script>
+    const poems = {
+      fr: [...Array(20).keys()].map(i => "Poème d'amour " + (i+1) + " en français."),
+      en: [...Array(20).keys()].map(i => "Love poem " + (i+1) + " in English."),
+      sw: [...Array(20).keys()].map(i => "Shairi la mapenzi " + (i+1) + " kwa Kiswahili."),
+      ln: [...Array(20).keys()].map(i => "Ndakisa ya bolingo " + (i+1) + " na Lingala.")
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginForm = document.getElementById("login-form");
+      const registerForm = document.getElementById("register-form");
+      const selector = document.getElementById("language-selector");
+      const poemeList = document.getElementById("poeme-list");
+
+      if (localStorage.getItem("loggedIn")) {
+        showApp();
+        renderPoems("fr");
+      }
+
+      if (loginForm) {
+        loginForm.onsubmit = (e) => {
+          e.preventDefault();
+          const username = document.getElementById("username").value;
+          const password = document.getElementById("password").value;
+          const user = JSON.parse(localStorage.getItem(username));
+          if (user && user.password === password) {
+            localStorage.setItem("loggedIn", username);
+            showApp();
+            renderPoems("fr");
+          } else {
+            document.getElementById("error-msg").innerText = "Nom ou mot de passe incorrect.";
+          }
+        };
+      }
+
+      if (registerForm) {
+        registerForm.onsubmit = (e) => {
+          e.preventDefault();
+          const newUser = document.getElementById("new-username").value;
+          const newPass = document.getElementById("new-password").value;
+          localStorage.setItem(newUser, JSON.stringify({ password: newPass }));
+          alert("Compte créé !");
+          document.getElementById("register").style.display = "none";
+        };
+      }
+
+      if (selector) {
+        selector.onchange = () => {
+          renderPoems(selector.value);
+        };
+      }
+
+      function renderPoems(lang) {
+        poemeList.innerHTML = "";
+        poems[lang].forEach(text => {
+          const div = document.createElement("div");
+          div.className = "poeme";
+          div.innerText = text;
+          poemeList.appendChild(div);
+        });
+      }
+
+      function showApp() {
+        document.getElementById("auth").style.display = "none";
+        document.getElementById("app").style.display = "block";
+      }
+    });
+
+    function showRegister() {
+      document.getElementById("register").style.display = "block";
+    }
+
+    function logout() {
+      localStorage.removeItem("loggedIn");
+      location.reload();
+    }
+  </script>
+</body>
+</html>
